@@ -1,0 +1,416 @@
+{
+	"info": {
+		"_postman_id": "71e496ec-17cd-4008-a0b3-cc338c495885",
+		"name": "Object APIs",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "31935804"
+	},
+	"item": [
+		{
+			"name": "POST Single Object",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test('Verify the status code', () => {",
+							"    pm.expect(pm.response.code).to.eql(200);",
+							"});",
+							"",
+							"pm.test('Verify the response time', () => {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});",
+							"",
+							"pm.test('verify required createdAt field', () => { ",
+							"    pm.expect(jsonData).to.have.property('createdAt');",
+							"});",
+							"",
+							"pm.test('Verify the Content type', () => {",
+							"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+							"});",
+							"",
+							"pm.collectionVariables.set('objectId', jsonData.id);",
+							"",
+							"// pm.execution.setNextRequest('verifyGetSingleObject')"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							"// Generate Randome name\r",
+							"let randomName = Math.random().toString(36).substring(2);\r",
+							"pm.collectionVariables.set(\"objectName\", 'Apple ' + randomName);\r",
+							"\r",
+							"// Generate Randome Year\r",
+							"let randomYear = Math.floor(Math.random() * 15) + 2010;\r",
+							"pm.collectionVariables.set(\"objectYear\", randomYear );\r",
+							"\r",
+							"// Generate random model\r",
+							"pm.collectionVariables.set('objectCPUModel', 'Intel - ' + randomYear) ;\r",
+							"\r",
+							"//Generate random hard disk size\r",
+							"pm.collectionVariables.set('objectHardDiskSize', Math.floor(Math.random() * 10)+\" TB\");\r",
+							"\r",
+							"//Generate random price\r",
+							"pm.collectionVariables.set('objectPrice', Number((Math.random() * 1000 + 100).toFixed(2)) ) ;\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"name\": \"{{objectName}}\" ,\r\n   \"data\": {\r\n      \"year\": {{objectYear}},\r\n      \"price\": {{objectPrice}},\r\n      \"CPU model\": \"{{objectCPUModel}}\",\r\n      \"Hard disk size\": \"{{objectHardDiskSize}}\"\r\n   }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{qaBaseURL}}/objects"
+			},
+			"response": []
+		},
+		{
+			"name": "GET Single Object",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response time is less than 1000ms\", function () {   ",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});",
+							"",
+							"pm.test('Validate JSON schema', () => {",
+							"    const schema = JSON.parse(pm.collectionVariables.get(\"objectSchemaForGet\"));",
+							"    pm.response.to.have.jsonSchema(schema);",
+							"});",
+							"",
+							"pm.test('Object data is correct', ( )=> {",
+							"    pm.expect(jsonData.name).to.eql(pm.collectionVariables.get(\"objectName\"));",
+							"    pm.expect(jsonData.data.year).to.eql(pm.collectionVariables.get(\"objectYear\"));",
+							"    pm.expect(jsonData.data.price).to.eql(pm.collectionVariables.get('objectPrice'));",
+							"    pm.expect(jsonData.data['CPU model']).to.eql(pm.collectionVariables.get('objectCPUModel'));",
+							"    pm.expect(jsonData.data['Hard disk size']).to.eql(pm.collectionVariables.get('objectHardDiskSize'));",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "https://api.restful-api.dev/objects/{{objectId}}"
+			},
+			"response": []
+		},
+		{
+			"name": "PUT Single Object",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test('Status code is 200', () =>  {\r",
+							"    pm.expect(pm.response.code).to.eql(200)\r",
+							"})\r",
+							"\r",
+							"pm.test('Response time is less than 1000ms', () =>{\r",
+							"    pm.expect( pm.response.responseTime).to.be.lessThan(1000);\r",
+							"})\r",
+							"\r",
+							"pm.test('Object data is correct', ( )=> {\r",
+							"    pm.expect(jsonData.name).to.eql(pm.collectionVariables.get(\"objectName\"));\r",
+							"    pm.expect(jsonData.data.year).to.eql(pm.collectionVariables.get('objectYear'));\r",
+							"    pm.expect(jsonData.data.price).to.eql(pm.collectionVariables.get('objectPrice'));\r",
+							"    pm.expect(jsonData.data['CPU model']).to.eql(pm.collectionVariables.get('objectCPUModel'));\r",
+							"    pm.expect(jsonData.data['Hard disk size']).to.eql(pm.collectionVariables.get('objectHardDiskSize'));\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.set(\"objectYear\", 2025);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"name\": \"{{objectName}}\" ,\r\n   \"data\": {\r\n      \"year\": {{objectYear}},\r\n      \"price\": {{objectPrice}},\r\n      \"CPU model\": \"{{objectCPUModel}}\",\r\n      \"Hard disk size\": \"{{objectHardDiskSize}}\"\r\n   }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "https://api.restful-api.dev/objects/{{objectId}}"
+			},
+			"response": []
+		},
+		{
+			"name": "PATCH Single Object",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json() ;\r",
+							"\r",
+							"pm.test('Statis code is 200', () => {\r",
+							"    pm.expect(pm.response.code).to.eql(200) ;\r",
+							"})\r",
+							"\r",
+							"pm.test('Response Time is lessThan 1000ms', () => {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+							"})\r",
+							"\r",
+							"pm.test('Object data is correct', ( )=> {\r",
+							"    pm.expect(jsonData.name).to.eql(pm.collectionVariables.get(\"objectName\"));\r",
+							"    pm.expect(jsonData.data.year).to.eql(pm.collectionVariables.get('objectYear'));\r",
+							"    pm.expect(jsonData.data.price).to.eql(pm.collectionVariables.get('objectPrice'));\r",
+							"    pm.expect(jsonData.data['CPU model']).to.eql(pm.collectionVariables.get('objectCPUModel'));\r",
+							"    pm.expect(jsonData.data['Hard disk size']).to.eql(pm.collectionVariables.get('objectHardDiskSize'));\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.set('objectName', 'Sansung-updated name' )"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"name\": \"{{objectName}}\" \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{qaBaseURL}}/objects/{{objectId}}"
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE Single Object",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 204', () => {\r",
+							"    pm.expect(pm.response.code).to.eql(200)\r",
+							"})\r",
+							"\r",
+							"pm.test('Response body is empty', () => {\r",
+							"    pm.expect(pm.response.json().message).to.include('has been deleted')\r",
+							"})\r",
+							"\r",
+							"pm.test('Response time is less than 500ms', () => { \r",
+							"    pm.expect(pm.response.responseTime).to.be.below(500)\r",
+							"})  "
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": "{{qaBaseURL}}/objects/{{objectId}}"
+			},
+			"response": []
+		},
+		{
+			"name": "GET All Objects",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response time is less than 1000ms\", function () {   \r",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "{{qaBaseURL}}/objects"
+			},
+			"response": []
+		},
+		{
+			"name": "GET List Of Object By Id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response time is less than 1000ms\", function () {   \r",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{qaBaseURL}}/objects?id=1&id=4",
+					"host": [
+						"{{qaBaseURL}}"
+					],
+					"path": [
+						"objects"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "1"
+						},
+						{
+							"key": "id",
+							"value": "4"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "objectId",
+			"value": "ff8081819782e69e019b7aa43f202b1c"
+		},
+		{
+			"key": "objectSchemaForGet",
+			"value": "{\"type\":\"object\",\"required\":[\"id\",\"name\",\"data\"],\"properties\":{\"id\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"data\":{\"type\":\"object\",\"required\":[\"year\",\"price\",\"CPU model\",\"Hard disk size\"],\"properties\":{\"year\":{\"type\":\"integer\"},\"price\":{\"type\":\"number\"},\"CPU model\":{\"type\":\"string\"},\"Hard disk size\":{\"type\":\"string\"}}}}}"
+		},
+		{
+			"key": "objectName",
+			"value": "Sansung-updated name"
+		},
+		{
+			"key": "objectYear",
+			"value": 2025
+		},
+		{
+			"key": "objectModel",
+			"value": "Intel - 2012"
+		},
+		{
+			"key": "objectHardDiskSize",
+			"value": "3 TB"
+		},
+		{
+			"key": "objectPrice",
+			"value": 618.76
+		},
+		{
+			"key": "objectCPUModel",
+			"value": "Intel - 2022"
+		}
+	]
+}
